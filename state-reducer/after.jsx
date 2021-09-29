@@ -15,7 +15,15 @@ const actions = {
   SET_STEPS: 'SET_STEPS',
 }
 
-const defaultReducer = (state, action) => {
+const combineReducers = (...reducers) => (state, action) => {
+  return reducers.reduce((acc, nextReducer) => {
+    return nextReducer(acc, action);
+  }, state);
+}
+
+const defaultReducer = (state, action) => state;
+
+const wizardReducer = (state, action) => {
   const { activePageIndex, steps } = state;
   switch(action.type) {
     case actions.NEXT_PAGE:
@@ -29,12 +37,15 @@ const defaultReducer = (state, action) => {
   }
 }
 
-const Wizard = ({ children }) => {
-  const [activePageIndex, setActivePageIndex] = React.useState(0);
-  const [steps, setSteps] = React.useState(0);
-  const [state, dispatch] = React.useReducer(
-    defaultReducer,
-    defaultInitialState
+const Wizard = ({ children, reducer = defaultReducer, initialState = {} }) => {
+  // const [activePageIndex, setActivePageIndex] = React.useState(0);
+  // const [steps, setSteps] = React.useState(0);
+  const [{ activePageIndex, steps }, dispatch] = React.useReducer(
+    combineReducers(wizardReducer, reducer),
+    {
+      ...defaultInitialState,
+      ...initialState
+    }
   )
 
   const goNextPage = () => {
@@ -122,9 +133,20 @@ const Page3 = () => (
 
 // App
 
+const initialState = {
+  activePageIndex: 2
+}
+
+const reducer = (state, action) => {
+  if (action.type === actions.NEXT_PAGE) {
+    console.log('Next page clicked');
+  }
+  return state;
+}
+
 const App = () => {
   return (
-    <Wizard>
+    <Wizard initialState={initialState} reducer={reducer}>
       <Wizard.Pages className="wizard__content">
         <Page1 />
         <Page2 />
