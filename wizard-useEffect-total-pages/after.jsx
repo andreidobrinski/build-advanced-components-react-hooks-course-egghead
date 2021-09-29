@@ -4,8 +4,9 @@ import React from "react";
 
 const WizardContext = React.createContext();
 
-const Wizard = ({ children, steps }) => {
+const Wizard = ({ children }) => {
   const [activePageIndex, setActivePageIndex] = React.useState(0);
+  const [steps, setSteps] = React.useState(0);
 
   const goNextPage = () => {
     setActivePageIndex((index) => index + 1);
@@ -19,7 +20,8 @@ const Wizard = ({ children, steps }) => {
     activePageIndex,
     goNextPage,
     goPrevPage,
-    steps
+    steps,
+    setSteps
   };
 
   return (
@@ -30,8 +32,12 @@ const Wizard = ({ children, steps }) => {
 };
 
 export const WizardPages = (props) => {
-  const { activePageIndex } = React.useContext(WizardContext);
+  const { activePageIndex, setSteps } = React.useContext(WizardContext);
   const pages = React.Children.toArray(props.children);
+  const steps = React.Children.count(props.children);
+  React.useEffect(() => {
+    setSteps(steps)
+  }, [steps, setSteps]);
   const currentPage = pages[activePageIndex];
   return <div {...props}>{currentPage}</div>;
 };
@@ -85,7 +91,7 @@ const Page3 = () => (
 
 const App = () => {
   return (
-    <Wizard steps={3}>
+    <Wizard>
       <Wizard.Pages className="wizard__content">
         <Page1 />
         <Page2 />
