@@ -4,17 +4,50 @@ import React from "react";
 
 const WizardContext = React.createContext();
 
+const defaultInitialState = {
+  activePageIndex: 0,
+  steps: 0
+};
+
+const actions = {
+  NEXT_PAGE: 'NEXT_PAGE',
+  PREV_PAGE: 'PREV_PAGE',
+  SET_STEPS: 'SET_STEPS',
+}
+
+const defaultReducer = (state, action) => {
+  const { activePageIndex, steps } = state;
+  switch(action.type) {
+    case actions.NEXT_PAGE:
+      return { ...state, activePageIndex: activePageIndex + 1 };
+    case actions.PREV_PAGE:
+      return { ...state, activePageIndex: activePageIndex - 1 };
+    case actions.SET_STEPS:
+      return { ...state, steps: action.payload };
+    default:
+      return state;
+  }
+}
+
 const Wizard = ({ children }) => {
   const [activePageIndex, setActivePageIndex] = React.useState(0);
   const [steps, setSteps] = React.useState(0);
+  const [state, dispatch] = React.useReducer(
+    defaultReducer,
+    defaultInitialState
+  )
 
   const goNextPage = () => {
-    setActivePageIndex((index) => index + 1);
+    dispatch({ type: actions.NEXT_PAGE });
   };
 
   const goPrevPage = () => {
-    setActivePageIndex((index) => index - 1);
+    dispatch({ type: action.PREV_PAGE });
   };
+
+  const setSteps = React.useCallback((n) => {
+    dispatch({ type: actions.SET_STEPS, payload: n });
+  }, [dispatch]);
 
   const context = {
     activePageIndex,
